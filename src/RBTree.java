@@ -69,24 +69,44 @@ public class RBTree<T> {
     }
 
     /**
-     * @param node
+     * If color of node´s parent is not BLACK or node is not root ->
+     * If color of uncle is RED:
+     * - change color of parent and uncle to BLACK
+     * - change color of grandparent to RED
+     * - node = grandparent and start balance from start (balanceTree1)
+     * @param node Node to check
      */
     private void balanceTree2(Node<T> node) {
-        if (node.getParent().getColor() != BLACK || !node.equals(_root)) {
-            if ((node.getUncle() != null) && (node.getUncle().getColor() == RED)) {
+        if (node.getParent().getColor() != BLACK ||
+                !node.equals(_root)) {
+
+            if ((node.getUncle() != null) &&
+                    (node.getUncle().getColor() == RED)) {
+
                 node.getParent().setColor(BLACK);
                 node.getUncle().setColor(BLACK);
                 node.getGrandparent().setColor(RED);
 
                 balanceTree1(node.getGrandparent());
             }
-        } else {
-            balanceTree3(node);
         }
+
+        balanceTree3(node);
     }
 
+    /**
+     * If node´s color is BLACK there are four cases for node, its parent and grandparent:
+     * - Left Left Case: parent is left child of grandparent and node is left child of parent
+     * - Left Right Case: parent is left child of grandparent and node is right child of parent
+     * - Right Left Case: parent is right child of grandparent and node is left child of parent
+     * - Right Right Case: parent is right child of grandparent and node is right child of parent
+     *
+     * @param node Node to check
+     */
     private void balanceTree3(Node<T> node) {
-        if ((node.getUncle() != null) && (node.getUncle().getColor() == BLACK)) {
+        if ((node.getUncle() != null) &&
+                (node.getUncle().getColor() == BLACK)) {
+
             leftLeftCase(node);
             leftRightCase(node);
             rightRightCase(node);
@@ -95,25 +115,31 @@ public class RBTree<T> {
     }
 
     /**
-     * Left Right Case (parent is right child of grandparent and node is left child of parent)
-     *
-     * @param node
+     * Right Left Case:
+     * - Right Rotate around parent
+     * - execute Right Right case
+     * @param node Node to check
      */
     private void rightLeftCase(Node<T> node) {
-        if (node.getParent().equals(node.getGrandparent().getRightChild()) && node.equals(node.getParent().getLeftChild())) {
-            Node parent = node.getParent();
+        if ((node.getGrandparent() != null) &&
+                (node.getParent().equals(node.getGrandparent().getRightChild())) &&
+                (node.equals(node.getParent().getLeftChild()))) {
+            Node<T> parent = node.getParent();
             rotateRight(node.getParent());
             rightRightCase(parent);
         }
     }
 
     /**
-     * Right Right Case (parent is right child of grandparent and node is right child of parent)
-     *
-     * @param node
+     * Right Right Case:
+     * - Left Rotate around grandparent
+     * - Swap colors of grandparent and parent
+     * @param node Node to check
      */
     private void rightRightCase(Node<T> node) {
-        if (node.getParent().equals(node.getGrandparent().getRightChild()) && node.equals(node.getParent().getRightChild())) {
+        if ((node.getGrandparent() != null) &&
+                node.getParent().equals(node.getGrandparent().getRightChild()) &&
+                node.equals(node.getParent().getRightChild())) {
             Node grandparent = node.getGrandparent();
             Node parent = node.getParent();
 
@@ -127,25 +153,31 @@ public class RBTree<T> {
     }
 
     /**
-     * Left Right Case (parent is left child of grandparent and node is right child of parent)
-     *
+     * Left Right Case:
+     * - Left Rotate around parent
+     * - Execute Left Left case with old parent
      * @param node
      */
     private void leftRightCase(Node<T> node) {
-        if (node.getParent().equals(node.getGrandparent().getLeftChild()) && node.equals(node.getParent().getRightChild())) {
-            Node parent = node.getParent();
+        if ((node.getGrandparent() != null) &&
+                node.getParent().equals(node.getGrandparent().getLeftChild()) &&
+                node.equals(node.getParent().getRightChild())) {
+            Node<T> parent = node.getParent();
             rotateLeft(parent);
             leftLeftCase(parent);
         }
     }
 
     /**
-     * //Left Left Case (parent is left child of grandparent and node is left child of parent)
-     *
-     * @param node
+     * Left Left Case:
+     * - Right Rotate around grandparent
+     * - Swap colors of grandparent and parent
+     * @param node Node to check
      */
     private void leftLeftCase(Node<T> node) {
-        if (node.getParent().equals(node.getGrandparent().getLeftChild()) && node.equals(node.getParent().getLeftChild())) {
+        if ((node.getGrandparent() != null) &&
+                node.getParent().equals(node.getGrandparent().getLeftChild()) &&
+                node.equals(node.getParent().getLeftChild())) {
             Node<T> grandparent = node.getGrandparent();
             Node<T> parent = node.getParent();
 
@@ -157,24 +189,48 @@ public class RBTree<T> {
         }
     }
 
+    /**
+     * Right Rotate around Node:
+     * - left child of node is new parent of node
+     * - right child of left child is new left child of node
+     * - parent of node is new parent of left child
+     * - if parent is null, left child is new root
+     * @param node Node to rotate
+     */
     private void rotateRight(Node<T> node) {
-        Node left = node.getLeftChild();
-        Node parent = node.getParent();
+        Node<T> left = node.getLeftChild();
+        Node<T> parent = node.getParent();
 
         node.setLeftChild(left.getRightChild());
         node.setParent(left);
         left.setRightChild(node);
         left.setParent(parent);
+
+        if (parent == null) {
+            _root = left;
+        }
     }
 
+    /**
+     * Left Rotate around Node:
+     * - right child of node is new parent of node
+     * - left child of right child is new right child of node
+     * - parent of node is new parent of right child
+     * - if parent is null, right child is new root
+     * @param node Node to rotate
+     */
     private void rotateLeft(Node<T> node) {
-        Node parent = node.getParent();
-        Node right = node.getRightChild();
+        Node<T> parent = node.getParent();
+        Node<T> right = node.getRightChild();
 
         node.setRightChild(right.getLeftChild());
         node.setParent(right);
         right.setParent(parent);
         right.setLeftChild(node);
+
+        if (parent == null) {
+            _root = right;
+        }
     }
 
     public T get(String key) {
@@ -199,11 +255,12 @@ public class RBTree<T> {
         return _root;
     }
 
-    public void debugPrint() {
-        Node current = _root;
+
+    public void traverseAll() {
+        traverse(_root);
     }
 
-    public void traverse(Node nextnode) {
+    private void traverse(Node<T> nextnode) {
         if (nextnode == NIL) {
             return;
         }
@@ -213,6 +270,5 @@ public class RBTree<T> {
 
         System.out.println(nextnode.toString());
     }
-
 
 }

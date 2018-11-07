@@ -2,7 +2,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RBTreeTest {
+class RBTreeTest {
 
     @Test
     void insertSimpleInteger() {
@@ -12,7 +12,8 @@ public class RBTreeTest {
         rb.insert("Third", 30);
         rb.insert("Fourth", 32);
         rb.insert("Fifth", 15);
-        rb.traverse(rb.getRoot());
+        rb.traverseAll();
+        System.out.println(rb.getRBHeight());
 
         assertEquals(new Integer(1), rb.get("First"));
     }
